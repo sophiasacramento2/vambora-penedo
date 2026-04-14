@@ -163,7 +163,7 @@ O app nasce da necessidade de centralizar e digitalizar essas informações, que
 
 ## 📄 Documentação
 
-A documentação técnica completa está disponível em [`docs/vambora-penedo-docs.docx`](docs/vambora-penedo-docs.docx).
+A documentação técnica completa está disponível em (https://docs.google.com/document/d/1cF4s5yMthEYOWyaBTxayppgbjc7bpPwm/edit?usp=sharing&ouid=117909527538761735989&rtpof=true&sd=true)
 
 ---
 
