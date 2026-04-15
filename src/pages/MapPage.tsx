@@ -145,7 +145,7 @@ const MapPage = () => {
                 style={
                   active
                     ? { background: col.active, color: "#fff", border: `1px solid ${col.active}` }
-                    : { background: "#fff", color: "#6b6560", border: "1px solid #e2dbd4" }
+                    : { background: "#fff", color: "hsl(var(--brand-muted))", border: "1px solid #e2dbd4" }
                 }
               >
                 <Icon size={13} />

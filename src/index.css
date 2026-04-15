@@ -28,6 +28,7 @@
   --brand-teal-soft: 174 40% 12%;
   --brand-orange: 22 80% 52%;
   --brand-orange-soft: 22 80% 14%;
+  --brand-muted: 28 6% 40%;
 }
 
 @layer base {
@@ -56,6 +57,7 @@
     --brand-teal-soft: 174 40% 92%;
     --brand-orange: 22 80% 52%;
     --brand-orange-soft: 22 80% 94%;
+    --brand-muted: 28 6% 40%;
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 24 18% 25%;
     --sidebar-primary: 22 80% 52%;

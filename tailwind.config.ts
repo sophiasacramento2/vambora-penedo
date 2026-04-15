@@ -58,6 +58,7 @@ export default {
           "orange-soft": "hsl(var(--brand-orange-soft))",
           teal: "hsl(var(--brand-teal))",
           "teal-soft": "hsl(var(--brand-teal-soft))",
+          muted: "hsl(var(--brand-muted))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
