@@ -87,10 +87,16 @@ export const useAppStore = create<AppStore>()(
 
       // RNF4.1 — registra evento anônimo de fluxo
       recordFlow: (e) =>
-        set((s) => ({
-          // mantém só os últimos 500 eventos pra não estourar o localStorage
-          flowEvents: [e, ...s.flowEvents].slice(0, 500),
-        })),
+        {
+          try {
+            set((s) => ({
+              // mantém só os últimos 500 eventos pra não estourar o localStorage
+              flowEvents: [e, ...s.flowEvents].slice(0, 500),
+            }));
+          } catch {
+            // Ignore analytics persistence failures to keep app stable.
+          }
+        },
 
       // Retorna ranking de destinos mais consultados
       getFlowSummary: () => {

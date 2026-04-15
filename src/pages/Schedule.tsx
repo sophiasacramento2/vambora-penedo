@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, Bus, Ship, Truck, Star, Calendar, CreditCard, Ticket, ChevronRight } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { routes, getNextDepartures, minutesUntilNext, paymentLabels, paymentIcons, getScheduleForDay } from "@/data/mockData";
 import { useAppStore } from "@/store/useAppStore";
-import { useFlowTracking } from "@/hooks/useFlowTracking";
 import ReservationModal from "@/components/ReservationModal";
 
 const dayTabs = [
@@ -21,10 +20,9 @@ const Schedule = () => {
   const [activeDay, setActiveDay] = useState<"weekdays" | "saturday" | "sunday">("weekdays");
   const [showReservation, setShowReservation] = useState(false);
   const { savedRouteIds, toggleSaveRoute } = useAppStore();
-  const { trackRouteView } = useFlowTracking();
-  useEffect(() => { if (route) trackRouteView(route.id, route.type, route.destination); }, [route?.id]);
 
   const route = routes.find((r) => r.id === routeId);
+
   if (!route) {
     return (
       <div className="page-container bg-background flex flex-col items-center justify-center">
