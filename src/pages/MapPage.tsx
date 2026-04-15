@@ -102,7 +102,11 @@ const MapPage = () => {
   const toggleType = (type: string) => {
     setActiveTypes((prev) => {
       const next = new Set(prev);
-      next.has(type) ? next.delete(type) : next.add(type);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
+      }
       return next;
     });
     setSelectedRoute(null);
@@ -145,7 +149,7 @@ const MapPage = () => {
                 style={
                   active
                     ? { background: col.active, color: "#fff", border: `1px solid ${col.active}` }
-                    : { background: "#fff", color: "#6b6560", border: "1px solid #e2dbd4" }
+                    : { background: "#fff", color: "hsl(var(--brand-muted))", border: "1px solid #e2dbd4" }
                 }
               >
                 <Icon size={13} />

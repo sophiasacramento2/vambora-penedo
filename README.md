@@ -26,6 +26,7 @@ A paleta de cores foi pensada para refletir o contexto geográfico e cultural de
 | 🟠 Laranja Vambora | `#E8621A` | Cor primária — ações, botões, identidade |
 | 🟢 Verde-água São Francisco | `#1a7a6e` | Sucesso, próximas partidas, barcos |
 | 🔵 Azul Intermunicipal | `#3b7dd8` | Vans intermunicipais |
+| ⚪ Cinza Muted | `#6b6560` | Textos secundários e estado inativo |
 | 🟤 Areia Penedo | `#f9f7f4` | Fundo claro |
 | ⚫ Noite do Sertão | `#13110e` | Fundo escuro |
 
@@ -51,7 +52,7 @@ npm install
 npm run dev
 ```
 
-Acesse em **http://localhost:8080**
+Acesse em **http://localhost:5173** (porta padrão do Vite)
 
 ### Outros comandos
 
@@ -60,7 +61,7 @@ npm run build       # Build de produção
 npm run preview     # Preview do build
 npm run test        # Testes unitários (Vitest)
 npm run lint        # Linting (ESLint)
-npx playwright test # Testes E2E
+npm run test:e2e    # Testes E2E (Playwright)
 ```
 
 ---
