@@ -12,6 +12,7 @@ import AlertsPage from "@/pages/AlertsPage";
 import FeedbackPage from "@/pages/FeedbackPage";
 import ReservationsPage from "@/pages/ReservationsPage";
 import NotFound from "@/pages/NotFound";
+import ForgotPassword from "@/pages/ForgotPassword";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -23,6 +24,7 @@ const AnimatedRoutes = () => {
         <Route path="/home" element={<HomePage />} />
         <Route path="/criar-conta" element={<CreateAccount />} />
         <Route path="/entrar" element={<Login />} />
+        <Route path="/esqueci-senha" element={<ForgotPassword />} />
         <Route path="/linhas/:type" element={<RoutesList />} />
         <Route path="/horarios/:routeId" element={<Schedule />} />
         <Route path="/mapa" element={<MapPage />} />
