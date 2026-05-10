@@ -4,6 +4,7 @@ import BottomNav from "@/components/BottomNav";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { mapRoutes, PENEDO_CENTER, MapRoute } from "@/data/mapRoutes";
+import { getRouteOSRM } from "@/services/osrmService";
 
 const typeIcon  = { bus: Bus,   van: Truck, boat: Ship  };
 const typeLabel = { bus: "Ônibus", van: "Vans", boat: "Barcos" };
@@ -19,6 +20,8 @@ const MapPage = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const layersRef       = useRef<L.LayerGroup>(L.layerGroup());
   const userMarkerRef   = useRef<L.Marker | null>(null);
+  const routeCacheRef   = useRef<Map<string, [number, number][]>>(new Map());
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
 
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [activeTypes, setActiveTypes]     = useState<Set<string>>(new Set(["bus", "van", "boat"]));
@@ -54,34 +57,54 @@ const MapPage = () => {
   useEffect(() => {
     const layers = layersRef.current;
     layers.clearLayers();
-    visibleRoutes.forEach((r) => {
-      L.polyline(r.path as L.LatLngExpression[], {
-        color: r.color, weight: 4, opacity: 0.85,
-      }).addTo(layers);
 
-      r.stops.forEach((stop) => {
-        const icon = L.divIcon({
-          className: "",
-          html: `<div style="width:11px;height:11px;border-radius:50%;background:${r.color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,
-          iconSize: [11, 11],
-          iconAnchor: [5, 5],
+    const drawRoutes = async () => {
+      setLoadingRoutes(true);
+
+      for (const r of visibleRoutes) {
+        let path: [number, number][];
+
+        if (r.type === "boat") {
+          path = r.path as [number, number][];
+        } else if (routeCacheRef.current.has(r.id)) {
+          path = routeCacheRef.current.get(r.id)!;
+        } else {
+          path = await getRouteOSRM(r.path as [number, number][]);
+          routeCacheRef.current.set(r.id, path);
+        }
+
+        L.polyline(path as L.LatLngExpression[], {
+          color: r.color, weight: 4, opacity: 0.85,
+        }).addTo(layers);
+
+        r.stops.forEach((stop) => {
+          const icon = L.divIcon({
+            className: "",
+            html: `<div style="width:11px;height:11px;border-radius:50%;background:${r.color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,
+            iconSize: [11, 11],
+            iconAnchor: [5, 5],
+          });
+          L.marker(stop.position as L.LatLngExpression, { icon })
+            .bindPopup(`<b style="font-size:13px;font-family:'Plus Jakarta Sans',sans-serif">${stop.name}</b><br/><span style="opacity:0.5;font-size:11px">${r.name}</span>`)
+            .addTo(layers);
         });
-        L.marker(stop.position as L.LatLngExpression, { icon })
-          .bindPopup(`<b style="font-size:13px;font-family:'Plus Jakarta Sans',sans-serif">${stop.name}</b><br/><span style="opacity:0.5;font-size:11px">${r.name}</span>`)
-          .addTo(layers);
-      });
-    });
-
-    if (mapRef.current) {
-      if (selectedRoute && route) {
-        mapRef.current.fitBounds(
-          L.latLngBounds(route.path as L.LatLngExpression[]),
-          { padding: [40, 40] }
-        );
-      } else if (!selectedRoute) {
-        mapRef.current.setView(PENEDO_CENTER, 14);
       }
-    }
+
+      if (mapRef.current) {
+        if (selectedRoute && route) {
+          mapRef.current.fitBounds(
+            L.latLngBounds(route.path as L.LatLngExpression[]),
+            { padding: [40, 40] }
+          );
+        } else if (!selectedRoute && !mapRef.current.getBounds().isValid()) {
+          mapRef.current.setView(PENEDO_CENTER, 14);
+        }
+      }
+
+      setLoadingRoutes(false);
+    };
+
+    drawRoutes();
   }, [visibleRoutes, selectedRoute, route]);
 
   useEffect(() => {
