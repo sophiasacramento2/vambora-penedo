@@ -69,7 +69,13 @@ const MapPage = () => {
         } else if (routeCacheRef.current.has(r.id)) {
           path = routeCacheRef.current.get(r.id)!;
         } else {
-          path = await getRouteOSRM(r.path as [number, number][]);
+          const smartPoints: [number, number][] = [
+            (r.path as [number, number][])[0], 
+            ...r.stops.map(s => s.position as [number, number]), 
+            (r.path as [number, number][])[(r.path as [number, number][]).length - 1]
+          ];
+
+          path = await getRouteOSRM(smartPoints);
           routeCacheRef.current.set(r.id, path);
         }
 
