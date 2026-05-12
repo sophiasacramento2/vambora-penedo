@@ -7,7 +7,7 @@ Estilo          Tailwind CSS 3 + shadcn/ui + Radix UI
 Mapa            Leaflet 1.9 (tiles CartoCDN)
 Estado          Zustand + middleware persist
 Formulários     React Hook Form + Zod
-Roteamento      React Router v6
+Roteamento      React Router v6 + OSRM (Open Source Routing Machine)
 PWA             vite-plugin-pwa + Workbox
 Notificações    Web Notifications API
 Fonte           Plus Jakarta Sans
