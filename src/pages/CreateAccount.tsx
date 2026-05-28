@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { authService } from "@/services/authService";
 
 
 const maskPhone = (v: string): string => {
@@ -40,15 +41,31 @@ const CreateAccount = () => {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setUser({ name: data.name, phone: data.phone, loggedIn: true });
-    navigate("/home");
+    try {
+      const response = await authService.signUp(data.phone, data.password, data.name);
+      if (response.user) {
+        setUser({ 
+          id: response.user.id, 
+          name: data.name, 
+          phone: data.phone, 
+          loggedIn: true 
+        });
+        navigate("/home");
+      }
+    } catch (err: any) {
+      setError("phone", { 
+        type: "manual", 
+        message: err.message || "Falha ao criar conta. Tente novamente." 
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
