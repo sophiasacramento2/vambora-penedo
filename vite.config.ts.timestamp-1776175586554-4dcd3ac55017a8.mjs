@@ -15,7 +15,7 @@ var vite_config_default = defineConfig(({ mode }) => ({
         short_name: "Vambora",
         description: "\xD4nibus, vans e barcos na palma da m\xE3o.",
         theme_color: "#E8621A",
-        background_color: "#13110e",
+        background_color: "#13110e", 
         display: "standalone",
         orientation: "portrait",
         start_url: "/",

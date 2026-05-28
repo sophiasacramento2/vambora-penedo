@@ -7,6 +7,14 @@ import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { authService } from "@/services/authService";
 
+const maskPhone = (v: string): string => {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return d.length ? `(${d}` : "";
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
+
 const schema = z.object({
   phone: z.string().min(10, "Celular inválido"),
   password: z.string().min(4, "Senha muito curta"),
@@ -71,8 +79,9 @@ const Login = () => {
         <div>
           <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Celular</label>
           <input
-            {...register("phone")}
+            {...(() => { const r = register("phone"); return { ...r, onChange: (e: React.ChangeEvent<HTMLInputElement>) => { e.target.value = maskPhone(e.target.value); r.onChange(e); } }; })()}
             type="tel"
+            inputMode="numeric"
             placeholder="(82) 99999-0000"
             className={`input-uber ${errors.phone ? "ring-2 ring-destructive/40" : ""}`}
           />
@@ -117,6 +126,7 @@ const Login = () => {
 
         <button
           type="button"
+          onClick={() => navigate("/esqueci-senha")}
           className="text-primary font-semibold text-sm text-center py-1"
         >
           Esqueci minha senha

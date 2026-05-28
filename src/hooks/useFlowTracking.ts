@@ -9,7 +9,11 @@ export function useFlowTracking() {
   const { recordFlow } = useAppStore();
 
   const trackRouteView = (routeId: string, type: string, destination: string) => {
-    recordFlow({ routeId, type, destination, at: new Date().toISOString() });
+    try {
+      recordFlow({ routeId, type, destination, at: new Date().toISOString() });
+    } catch {
+      // Flow analytics must never break route rendering.
+    }
   };
 
   return { trackRouteView };

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -58,6 +59,7 @@ export default {
           "orange-soft": "hsl(var(--brand-orange-soft))",
           teal: "hsl(var(--brand-teal))",
           "teal-soft": "hsl(var(--brand-teal-soft))",
+          muted: "hsl(var(--brand-muted))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
@@ -103,5 +105,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

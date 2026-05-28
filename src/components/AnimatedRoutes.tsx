@@ -1,5 +1,4 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
 import Welcome from "@/pages/Welcome";
 import HomePage from "@/pages/HomePage";
 import CreateAccount from "@/pages/CreateAccount";
@@ -13,35 +12,19 @@ import AlertsPage from "@/pages/AlertsPage";
 import FeedbackPage from "@/pages/FeedbackPage";
 import ReservationsPage from "@/pages/ReservationsPage";
 import NotFound from "@/pages/NotFound";
+import ForgotPassword from "@/pages/ForgotPassword";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransitionStage] = useState<"enter" | "exit">("enter");
-
-  useEffect(() => {
-    if (location.pathname !== displayLocation.pathname) {
-      setTransitionStage("exit");
-    }
-  }, [location, displayLocation]);
-
-  const handleAnimationEnd = () => {
-    if (transitionStage === "exit") {
-      setDisplayLocation(location);
-      setTransitionStage("enter");
-    }
-  };
 
   return (
-    <div
-      className={`page-transition ${transitionStage === "enter" ? "page-enter" : "page-exit"}`}
-      onAnimationEnd={handleAnimationEnd}
-    >
-      <Routes location={displayLocation}>
+    <div key={`${location.pathname}-${location.key}`} className="page-transition page-enter">
+      <Routes location={location}>
         <Route path="/" element={<Welcome />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/criar-conta" element={<CreateAccount />} />
         <Route path="/entrar" element={<Login />} />
+        <Route path="/esqueci-senha" element={<ForgotPassword />} />
         <Route path="/linhas/:type" element={<RoutesList />} />
         <Route path="/horarios/:routeId" element={<Schedule />} />
         <Route path="/mapa" element={<MapPage />} />
