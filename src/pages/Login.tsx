@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { authService } from "@/services/authService";
 
 const schema = z.object({
   phone: z.string().min(10, "Celular inválido"),
@@ -27,15 +28,31 @@ const Login = () => {
   const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setUser({ phone: data.phone, name: "Maria Silva", loggedIn: true });
-    navigate("/home");
+    try {
+      const response = await authService.signIn(data.phone, data.password);
+      if (response.user) {
+        setUser({
+          id: response.user.id,
+          phone: data.phone,
+          name: response.user.user_metadata?.full_name || "Passageiro",
+          loggedIn: true
+        });
+        navigate("/home");
+      }
+    } catch (err: any) {
+      setError("phone", {
+        type: "manual",
+        message: err.message || "Celular ou senha inválidos."
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
