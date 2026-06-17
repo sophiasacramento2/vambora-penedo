@@ -389,9 +389,9 @@ export const useAppStore = create<AppStore>()(
           const reservations: Reservation[] = cloudRes.map(r => ({
             id: r.id,
             routeId: r.route_id,
-            routeName: (r.routes as any)?.name || 'Linha Vambora',
+            routeName: (r.routes as { name?: string })?.name || 'Linha Vambora',
             date: new Date(r.reserved_at).toLocaleDateString('pt-BR'),
-            time: (r.schedules as any)?.departure_time || '--:--',
+            time: (r.schedules as { departure_time?: string })?.departure_time || '--:--',
             seats: r.seats,
             totalPrice: Number(r.total_amount),
             paymentMethod: r.payment_method === 'cash' ? 'Dinheiro' : r.payment_method === 'card' ? 'Cartão' : 'Pix',

@@ -53,10 +53,10 @@ const Login = () => {
         });
         navigate("/home");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("phone", {
         type: "manual",
-        message: err.message || "Celular ou senha inválidos."
+        message: err instanceof Error ? err.message : "Celular ou senha inválidos."
       });
     } finally {
       setLoading(false);

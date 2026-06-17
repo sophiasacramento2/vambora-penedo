@@ -58,10 +58,10 @@ const CreateAccount = () => {
         });
         navigate("/home");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("phone", {
         type: "manual",
-        message: err.message || "Falha ao criar conta. Tente novamente."
+        message: err instanceof Error ? err.message : "Falha ao criar conta. Tente novamente."
       });
     } finally {
       setLoading(false);

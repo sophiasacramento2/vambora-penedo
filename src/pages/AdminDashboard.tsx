@@ -60,6 +60,7 @@ const AdminDashboard = () => {
 
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png").addTo(map);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (L as any)
       .heatLayer(heatPoints, {
         radius: 28,

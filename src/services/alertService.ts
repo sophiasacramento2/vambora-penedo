@@ -45,7 +45,7 @@ export const alertService = {
   },
 
   // Subscrição em Tempo Real para novos alertas com severity = danger
-  subscribeToNewAlerts(callback: (alert: any) => void) {
+  subscribeToNewAlerts(callback: (alert: Record<string, unknown>) => void) {
     return supabase
       .channel('realtime-danger-alerts')
       .on(
