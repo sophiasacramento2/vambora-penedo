@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   Download,
@@ -7,6 +6,9 @@ import {
   MapPinned,
   TriangleAlert,
   Users,
+  Bell,
+  X,
+  MessageSquare
 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -34,12 +36,17 @@ import {
   modalDemand,
   chronicDelayTable,
 } from "@/data/analyticsData";
+import { useAppStore } from "@/store/useAppStore";
+import { routes } from "@/data/mockData";
 
 const PIE_COLORS = ["#E8621A", "#3b7dd8", "#1a7a6e"];
 
 const AdminDashboard = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const { suggestions, markSuggestionRead } = useAppStore();
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const unreadSuggestions = suggestions.filter((s) => !s.read).length;
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -141,7 +148,7 @@ const AdminDashboard = () => {
               <ArrowLeft size={16} />
               Voltar ao mapa
             </a>
-            <h1 className="text-2xl md:text-3xl font-black text-foreground">
+            <h1 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3">
               Dashboard Gerencial de Mobilidade
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -151,8 +158,20 @@ const AdminDashboard = () => {
 
           <div className="flex gap-2">
             <button
+              onClick={() => setIsNotificationsOpen(true)}
+              className="relative p-2 rounded-xl border border-border bg-white text-foreground shadow-sm flex items-center justify-center hover:bg-muted transition-colors"
+              title="Notificações e Sugestões"
+            >
+              <Bell size={20} />
+              {unreadSuggestions > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                  {unreadSuggestions}
+                </span>
+              )}
+            </button>
+            <button
               onClick={exportCsvReport}
-              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-sm flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-sm flex items-center gap-2 hover:bg-primary/90 transition-colors"
             >
               <Download size={16} />
               Exportar CSV
@@ -160,13 +179,87 @@ const AdminDashboard = () => {
 
             <button
               onClick={printReport}
-              className="px-4 py-2 rounded-xl border border-border bg-white text-foreground font-bold text-sm shadow-sm flex items-center gap-2"
+              className="px-4 py-2 rounded-xl border border-border bg-white text-foreground font-bold text-sm shadow-sm flex items-center gap-2 hover:bg-muted transition-colors"
             >
               <FileText size={16} />
               Imprimir / PDF
             </button>
           </div>
         </div>
+
+        {/* Painel lateral de notificações */}
+        {isNotificationsOpen && (
+          <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-sm bg-background h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h2 className="text-lg font-black flex items-center gap-2">
+                  <Bell size={20} />
+                  Notificações
+                </h2>
+                <button
+                  onClick={() => setIsNotificationsOpen(false)}
+                  className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                {suggestions.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-10 flex flex-col items-center gap-2">
+                    <MessageSquare size={32} className="opacity-20" />
+                    <p>Nenhuma sugestão ou feedback recebido ainda.</p>
+                  </div>
+                ) : (
+                  suggestions.map((sug) => {
+                    const routeName = routes.find((r) => r.id === sug.routeId)?.name;
+                    return (
+                      <div
+                        key={sug.id}
+                        className={`p-4 rounded-xl border transition-colors cursor-pointer ${
+                          sug.read
+                            ? "bg-card border-border opacity-70"
+                            : "bg-blue-50/50 border-blue-200 shadow-sm"
+                        }`}
+                        onClick={() => !sug.read && markSuggestionRead(sug.id)}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-xs font-semibold text-muted-foreground">
+                            {new Date(sug.createdAt).toLocaleString("pt-BR")}
+                          </span>
+                          {!sug.read && (
+                            <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              NOVO
+                            </span>
+                          )}
+                        </div>
+                        {routeName && (
+                          <div className="text-xs font-bold text-primary mb-2">
+                            Linha: {routeName}
+                          </div>
+                        )}
+                        {sug.problems.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {sug.problems.map((p, i) => (
+                              <span key={i} className="text-[10px] bg-muted px-2 py-1 rounded-full font-semibold">
+                                {p}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {sug.details && (
+                          <p className="text-sm text-foreground mt-2 break-words">
+                            "{sug.details}"
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">

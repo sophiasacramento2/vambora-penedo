@@ -6,6 +6,15 @@ import { reservationService } from "@/services/reservationService";
 import { alertService } from "@/services/alertService";
 import { flowService } from "@/services/flowService";
 
+export interface Suggestion {
+  id: string;
+  routeId: string;
+  problems: string[];
+  details: string;
+  createdAt: string;
+  read: boolean;
+}
+
 interface User {
   id?: string; // UUID do Supabase Auth
   name: string;
@@ -56,6 +65,7 @@ interface AppStore {
   reservations: Reservation[];
   flowEvents: FlowEvent[];
   walletTransactions: WalletTransaction[];
+  suggestions: Suggestion[];
   isLoading: boolean;
 
   setUser: (u: Partial<User>) => void;
@@ -72,6 +82,8 @@ interface AppStore {
   updateTransactionStatus: (id: string, status: PaymentStatus) => void;
   payWithWallet: (amount: number, routeName: string, routeType: "bus" | "van" | "boat") => boolean;
   refundWallet: (amount: number, routeName: string) => void;
+  addSuggestion: (s: Omit<Suggestion, "id" | "createdAt" | "read">) => void;
+  markSuggestionRead: (id: string) => void;
   
   // Métodos de sincronização com o Supabase
   fetchCloudData: (userId: string) => Promise<void>;
@@ -87,6 +99,7 @@ export const useAppStore = create<AppStore>()(
       reservations: [],
       flowEvents: [],
       walletTransactions: [],
+      suggestions: [],
       isLoading: false,
 
       setUser: (u) => {
@@ -106,6 +119,7 @@ export const useAppStore = create<AppStore>()(
           alertsRead: [],
           reservations: [],
           walletTransactions: [],
+          suggestions: [],
         });
       },
 
@@ -337,6 +351,26 @@ export const useAppStore = create<AppStore>()(
         set({
           user: { ...user, wallet_balance: (user.wallet_balance || 0) + amount },
           walletTransactions: [newTransaction, ...walletTransactions]
+        });
+      },
+
+      addSuggestion: (s) => {
+        const { suggestions } = get();
+        const newSuggestion: Suggestion = {
+          ...s,
+          id: `sug-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          read: false,
+        };
+        set({ suggestions: [newSuggestion, ...suggestions] });
+      },
+
+      markSuggestionRead: (id) => {
+        const { suggestions } = get();
+        set({
+          suggestions: suggestions.map((s) =>
+            s.id === id ? { ...s, read: true } : s
+          ),
         });
       },
 

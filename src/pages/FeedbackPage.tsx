@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, CheckCircle, ChevronDown } from "lucide-react";
 import { routes } from "@/data/mockData";
+import { useAppStore } from "@/store/useAppStore";
 
 const quickProblems = [
   "Ônibus não passou",
@@ -21,12 +22,23 @@ const FeedbackPage = () => {
   const [selectedRouteId, setSelectedRouteId] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  const { addSuggestion } = useAppStore();
+
   const toggleProblem = (p: string) =>
     setSelectedProblems((prev) =>
       prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
     );
 
   const canSubmit = selectedProblems.length > 0 || details.trim().length > 0;
+
+  const handleSubmit = () => {
+    addSuggestion({
+      routeId: selectedRouteId,
+      problems: selectedProblems,
+      details,
+    });
+    setSubmitted(true);
+  };
 
   if (submitted) {
     return (
@@ -107,7 +119,7 @@ const FeedbackPage = () => {
       </div>
 
       <button
-        onClick={() => setSubmitted(true)}
+        onClick={handleSubmit}
         disabled={!canSubmit}
         className={`btn-primary flex items-center justify-center gap-2 ${!canSubmit ? "opacity-30" : ""}`}
       >
