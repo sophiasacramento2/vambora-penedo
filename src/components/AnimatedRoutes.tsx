@@ -1,3 +1,4 @@
+console.log("AnimatedRoutes carregado");
 import { Routes, Route, useLocation } from "react-router-dom";
 import Welcome from "@/pages/Welcome";
 import HomePage from "@/pages/HomePage";
@@ -12,11 +13,12 @@ import AlertsPage from "@/pages/AlertsPage";
 import FeedbackPage from "@/pages/FeedbackPage";
 import ReservationsPage from "@/pages/ReservationsPage";
 import NotFound from "@/pages/NotFound";
+import AdminDashboard from "@/pages/AdminDashboard";
 import ForgotPassword from "@/pages/ForgotPassword";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
-
+   console.log(location.pathname);
   return (
     <div key={`${location.pathname}-${location.key}`} className="page-transition page-enter">
       <Routes location={location}>
@@ -33,6 +35,7 @@ const AnimatedRoutes = () => {
         <Route path="/alertas" element={<AlertsPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/reservas" element={<ReservationsPage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
