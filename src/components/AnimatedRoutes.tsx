@@ -14,6 +14,7 @@ import FeedbackPage from "@/pages/FeedbackPage";
 import ReservationsPage from "@/pages/ReservationsPage";
 import NotFound from "@/pages/NotFound";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminLogin from "@/pages/AdminLogin";
 import ForgotPassword from "@/pages/ForgotPassword";
 
 const AnimatedRoutes = () => {
@@ -35,7 +36,8 @@ const AnimatedRoutes = () => {
         <Route path="/alertas" element={<AlertsPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/reservas" element={<ReservationsPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
