@@ -21,6 +21,7 @@ interface User {
   phone: string;
   loggedIn: boolean;
   wallet_balance?: number;
+  isAdmin?: boolean;
 }
 
 export interface Reservation {

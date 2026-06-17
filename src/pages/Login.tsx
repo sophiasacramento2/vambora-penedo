@@ -43,13 +43,31 @@ const Login = () => {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
+      // Admin Login Check
+      const adminPhone = import.meta.env.VITE_ADMIN_PHONE;
+      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+
+      if (adminPhone && adminPassword && data.phone === adminPhone && data.password === adminPassword) {
+        setUser({
+          id: "admin-id",
+          phone: data.phone,
+          name: "Administrador",
+          loggedIn: true,
+          isAdmin: true
+        });
+        navigate("/admin");
+        return;
+      }
+
+      // Normal User Login
       const response = await authService.signIn(data.phone, data.password);
       if (response.user) {
         setUser({
           id: response.user.id,
           phone: data.phone,
           name: response.user.user_metadata?.full_name || "Passageiro",
-          loggedIn: true
+          loggedIn: true,
+          isAdmin: false
         });
         navigate("/home");
       }
