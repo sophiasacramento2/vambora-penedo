@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X, Check, Minus, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { X, Check, Minus, Plus, AlertTriangle } from "lucide-react";
 import { Route, paymentLabels, paymentIcons } from "@/data/mockData";
 import { useAppStore, Reservation } from "@/store/useAppStore";
 
@@ -18,19 +19,31 @@ const fmt = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 
 export default function ReservationModal({ route, onClose }: Props) {
-  const { addReservation, user } = useAppStore();
+  const navigate = useNavigate();
+  const { addReservation, user, payWithWallet } = useAppStore();
   const [step, setStep] = useState<"form"|"done">("form");
   const [date, setDate] = useState(fmt(today));
   const [seats, setSeats] = useState(1);
-  const [payMethod, setPayMethod] = useState(route.paymentMethods[0]);
+  const [payMethod, setPayMethod] = useState<string>(route.paymentMethods[0]);
+  const [showError, setShowError] = useState(false);
 
   const selDay = nextDays.find((d) => fmt(d) === date) || today;
   const dow = selDay.getDay();
   const sched = dow === 0 ? route.schedules.sunday : dow === 6 ? route.schedules.saturday : route.schedules.weekdays;
   const [time, setTime] = useState(sched[0] || "06:00");
   const total = route.price * seats;
+  
+  const availablePaymentMethods = [...route.paymentMethods, "wallet" as const];
 
   const handleConfirm = () => {
+    if (payMethod === "wallet") {
+      if ((user.wallet_balance || 0) < total) {
+        setShowError(true);
+        return;
+      }
+      payWithWallet(total, route.name, route.type);
+    }
+
     const res: Reservation = {
       id: `res-${Date.now()}`,
       routeId: route.id,
@@ -162,19 +175,33 @@ export default function ReservationModal({ route, onClose }: Props) {
         <div>
           <p className="section-title">Pagamento</p>
           <div className="flex flex-col gap-2">
-            {route.paymentMethods.map((pm) => (
+            {availablePaymentMethods.map((pm) => (
               <button
                 key={pm}
-                onClick={() => setPayMethod(pm)}
+                onClick={() => { setPayMethod(pm); setShowError(false); }}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
                   payMethod === pm ? "bg-foreground text-background border-foreground" : "bg-card border-border text-foreground"
                 }`}
               >
-                <span className="text-lg">{paymentIcons[pm]}</span>
-                <span className="font-semibold text-sm">{paymentLabels[pm]}</span>
+                <span className="text-lg">{paymentIcons[pm as keyof typeof paymentIcons]}</span>
+                <span className="font-semibold text-sm">{paymentLabels[pm as keyof typeof paymentLabels]}</span>
               </button>
             ))}
           </div>
+          
+          {showError && (
+            <div className="mt-4 p-4 bg-destructive/10 rounded-xl border border-destructive/20 flex flex-col items-center text-center animate-in zoom-in-95">
+              <AlertTriangle className="text-destructive mb-2" size={24} />
+              <p className="text-sm font-bold text-destructive mb-1">Saldo insuficiente</p>
+              <p className="text-xs text-destructive/80 mb-3">Sua carteira tem apenas R$ {(user.wallet_balance || 0).toFixed(2)}.</p>
+              <button 
+                onClick={() => navigate('/carteira?recharge=true')}
+                className="w-full py-2 bg-destructive text-destructive-foreground rounded-lg font-bold text-sm"
+              >
+                Recarregar agora
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
