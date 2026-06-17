@@ -60,17 +60,17 @@ const STEPS: Step[] = ["phone", "code", "password"];
 const ForgotPassword = () => {
   const navigate = useNavigate();
 
-  const [step, setStep]           = useState<Step>("phone");
-  const [phone, setPhone]         = useState("");
-  const [loading, setLoading]     = useState(false);
+  const [step, setStep] = useState<Step>("phone");
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
   const [codeError, setCodeError] = useState("");
   const [countdown, setCountdown] = useState(RESEND_DELAY);
   const [canResend, setCanResend] = useState(false);
-  const [showPw, setShowPw]       = useState(false);
-  const [showCf, setShowCf]       = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [showCf, setShowCf] = useState(false);
 
   const [otp, setOtp] = useState(Array(6).fill(""));
-  const otpRefs       = useRef<(HTMLInputElement | null)[]>([]);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (step !== "code") return;
@@ -86,7 +86,7 @@ const ForgotPassword = () => {
   }, [step]);
 
   const phoneForm = useForm<PhoneForm>({ resolver: zodResolver(phoneSchema) });
-  const pwForm    = useForm<PasswordForm>({ resolver: zodResolver(passwordSchema) });
+  const pwForm = useForm<PasswordForm>({ resolver: zodResolver(passwordSchema) });
 
   const onSendCode = async (data: PhoneForm) => {
     setLoading(true);
@@ -155,13 +155,13 @@ const ForgotPassword = () => {
   };
 
   const goBack = () => {
-    if (step === "phone")    navigate(-1);
-    if (step === "code")     setStep("phone");
+    if (step === "phone") navigate(-1);
+    if (step === "code") setStep("phone");
     if (step === "password") setStep("code");
   };
 
   const maskedPhone = phone.replace(/(\d{2})(\d{4,5})(\d{4})/, "($1) $2-$3");
-  const stepIndex   = STEPS.indexOf(step as "phone" | "code" | "password");
+  const stepIndex = STEPS.indexOf(step as "phone" | "code" | "password");
 
   if (step === "done") {
     return (
@@ -194,9 +194,8 @@ const ForgotPassword = () => {
         {STEPS.map((s, i) => (
           <div
             key={s}
-            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              stepIndex >= i ? "bg-primary" : "bg-muted"
-            }`}
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${stepIndex >= i ? "bg-primary" : "bg-muted"
+              }`}
           />
         ))}
       </div>
@@ -330,7 +329,7 @@ const ForgotPassword = () => {
                   {...pwForm.register("password")}
                   id="new-password"
                   type={showPw ? "text" : "password"}
-                  placeholder="Mínimo 4 dígitos"
+                  placeholder="Mínimo 6 dígitos"
                   className={`input-uber pr-12 ${pwForm.formState.errors.password ? "ring-2 ring-destructive/40" : ""}`}
                 />
                 <button

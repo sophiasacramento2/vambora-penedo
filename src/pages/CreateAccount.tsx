@@ -50,18 +50,18 @@ const CreateAccount = () => {
     try {
       const response = await authService.signUp(data.phone, data.password, data.name);
       if (response.user) {
-        setUser({ 
-          id: response.user.id, 
-          name: data.name, 
-          phone: data.phone, 
-          loggedIn: true 
+        setUser({
+          id: response.user.id,
+          name: data.name,
+          phone: data.phone,
+          loggedIn: true
         });
         navigate("/home");
       }
     } catch (err: any) {
-      setError("phone", { 
-        type: "manual", 
-        message: err.message || "Falha ao criar conta. Tente novamente." 
+      setError("phone", {
+        type: "manual",
+        message: err.message || "Falha ao criar conta. Tente novamente."
       });
     } finally {
       setLoading(false);
@@ -110,7 +110,7 @@ const CreateAccount = () => {
             <input
               {...register("password")}
               type={showPw ? "text" : "password"}
-              placeholder="Mínimo 4 dígitos"
+              placeholder="Mínimo 6 dígitos"
               className={`input-uber pr-12 ${errors.password ? "ring-2 ring-destructive/40" : ""}`}
             />
             <button
@@ -132,8 +132,8 @@ const CreateAccount = () => {
           {loading ? (
             <>
               <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
               Criando conta...
             </>
