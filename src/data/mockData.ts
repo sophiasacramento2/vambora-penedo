@@ -17,13 +17,14 @@ export interface Route {
   frequency?: string;
 }
 
-export type PaymentMethod = "cash" | "card" | "pix" | "pass";
+export type PaymentMethod = "cash" | "card" | "pix" | "pass" | "wallet";
 
 export const paymentLabels: Record<PaymentMethod, string> = {
   cash: "Dinheiro",
   card: "Cartão",
   pix: "Pix",
   pass: "Cartão de Transporte",
+  wallet: "Carteira Vambora",
 };
 
 export const paymentIcons: Record<PaymentMethod, string> = {
@@ -31,6 +32,7 @@ export const paymentIcons: Record<PaymentMethod, string> = {
   card: "💳",
   pix: "⚡",
   pass: "🎫",
+  wallet: "💼",
 };
 
 export const routes: Route[] = [

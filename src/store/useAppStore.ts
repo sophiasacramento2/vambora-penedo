@@ -35,12 +35,27 @@ export interface FlowEvent {
   at: string;
 }
 
+export type PaymentStatus = 'PENDING' | 'CONFIRMED' | 'FAILED';
+
+export interface WalletTransaction {
+  id: string;
+  amount: number;
+  type: 'recharge' | 'payment' | 'refund';
+  status: PaymentStatus;
+  createdAt: string;
+  asaasPaymentId?: string;
+  pixPayload?: string;
+  routeName?: string;
+  routeType?: "bus" | "van" | "boat";
+}
+
 interface AppStore {
   user: User;
   savedRouteIds: string[];
   alertsRead: string[];
   reservations: Reservation[];
   flowEvents: FlowEvent[];
+  walletTransactions: WalletTransaction[];
   isLoading: boolean;
 
   setUser: (u: Partial<User>) => void;
@@ -52,6 +67,11 @@ interface AppStore {
   cancelReservation: (id: string) => Promise<void>;
   recordFlow: (e: FlowEvent) => Promise<void>;
   getFlowSummary: () => Record<string, number>;
+  addFunds: (amount: number) => void;
+  createPendingRecharge: (amount: number, pixPayload?: string) => string;
+  updateTransactionStatus: (id: string, status: PaymentStatus) => void;
+  payWithWallet: (amount: number, routeName: string, routeType: "bus" | "van" | "boat") => boolean;
+  refundWallet: (amount: number, routeName: string) => void;
   
   // Métodos de sincronização com o Supabase
   fetchCloudData: (userId: string) => Promise<void>;
@@ -66,6 +86,7 @@ export const useAppStore = create<AppStore>()(
       alertsRead: [],
       reservations: [],
       flowEvents: [],
+      walletTransactions: [],
       isLoading: false,
 
       setUser: (u) => {
@@ -84,6 +105,7 @@ export const useAppStore = create<AppStore>()(
           savedRouteIds: [],
           alertsRead: [],
           reservations: [],
+          walletTransactions: [],
         });
       },
 
@@ -167,6 +189,15 @@ export const useAppStore = create<AppStore>()(
       cancelReservation: async (id) => {
         const { user, reservations } = get();
 
+        const resToCancel = reservations.find(r => r.id === id);
+        
+        if (resToCancel && resToCancel.status !== "cancelled") {
+          // If paid with wallet, refund the money
+          if (resToCancel.paymentMethod === 'wallet' || resToCancel.paymentMethod === 'carteira') {
+            get().refundWallet(resToCancel.totalPrice, resToCancel.routeName);
+          }
+        }
+
         // Cancela localmente
         set({
           reservations: reservations.map((r) =>
@@ -212,6 +243,101 @@ export const useAppStore = create<AppStore>()(
           }
           return acc;
         }, {});
+      },
+
+      addFunds: (amount) => {
+        const { user, walletTransactions } = get();
+        const newTransaction: WalletTransaction = {
+          id: `tx-${Date.now()}`,
+          amount,
+          type: 'recharge',
+          status: 'CONFIRMED',
+          createdAt: new Date().toISOString(),
+        };
+        set({
+          user: { ...user, wallet_balance: (user.wallet_balance || 0) + amount },
+          walletTransactions: [newTransaction, ...walletTransactions]
+        });
+      },
+
+      createPendingRecharge: (amount, pixPayload) => {
+        const { walletTransactions } = get();
+        const id = `tx-${Date.now()}`;
+        const newTransaction: WalletTransaction = {
+          id,
+          amount,
+          type: 'recharge',
+          status: 'PENDING',
+          createdAt: new Date().toISOString(),
+          pixPayload
+        };
+        set({
+          walletTransactions: [newTransaction, ...walletTransactions]
+        });
+        return id;
+      },
+
+      updateTransactionStatus: (id, status) => {
+        const { walletTransactions, user } = get();
+        
+        // If we are confirming a pending transaction, we should also add the funds
+        const tx = walletTransactions.find(t => t.id === id);
+        if (tx && status === 'CONFIRMED' && tx.status !== 'CONFIRMED') {
+           set({
+             user: { ...user, wallet_balance: (user.wallet_balance || 0) + tx.amount },
+             walletTransactions: walletTransactions.map(t => 
+               t.id === id ? { ...t, status } : t
+             )
+           });
+        } else {
+           set({
+             walletTransactions: walletTransactions.map(t => 
+               t.id === id ? { ...t, status } : t
+             )
+           });
+        }
+      },
+
+      payWithWallet: (amount, routeName, routeType) => {
+        const { user, walletTransactions } = get();
+        if ((user.wallet_balance || 0) < amount) {
+          return false;
+        }
+        
+        const newTransaction: WalletTransaction = {
+          id: `tx-${Date.now()}`,
+          amount,
+          type: 'payment',
+          status: 'CONFIRMED',
+          createdAt: new Date().toISOString(),
+          routeName,
+          routeType
+        };
+        
+        set({
+          user: { ...user, wallet_balance: (user.wallet_balance || 0) - amount },
+          walletTransactions: [newTransaction, ...walletTransactions]
+        });
+        
+        return true;
+      },
+
+      refundWallet: (amount, routeName) => {
+        const { user, walletTransactions } = get();
+        
+        const newTransaction: WalletTransaction = {
+          id: `tx-${Date.now()}`,
+          amount,
+          type: 'refund',
+          status: 'CONFIRMED',
+          createdAt: new Date().toISOString(),
+          routeName
+        };
+        
+        set({
+          user: { ...user, wallet_balance: (user.wallet_balance || 0) + amount },
+          walletTransactions: [newTransaction, ...walletTransactions]
+        });
       },
 
       // ─── MÉTODOS DE SINCRONIZAÇÃO COMPLETA SUPABASE ───

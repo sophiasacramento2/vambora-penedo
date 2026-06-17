@@ -21,7 +21,6 @@ export const authService = {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      phone: phone.replace(/\D/g, ''),
       options: {
         data: {
           full_name: fullName,
@@ -45,7 +44,20 @@ export const authService = {
       email,
       password,
     })
-    if (error) throw error
+    
+    // Supabase pode rejeitar com email_not_confirmed mesmo quando a confirmação
+    // está desativada no projeto (depende da versão). Neste caso, o signUp já
+    // retornou o usuário corretamente e a sessão é válida — apenas ignoramos o erro.
+    if (error) {
+      if (error.message === 'Email not confirmed') {
+        // Tenta obter a sessão atual que o signUp pode ter criado
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (sessionData.session) {
+          return { user: sessionData.session.user, session: sessionData.session }
+        }
+      }
+      throw error
+    }
 
     // Migrar dados locais do LocalStorage para a nuvem
     if (data.user) {

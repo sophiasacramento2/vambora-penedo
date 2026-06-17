@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables (credenciais sensíveis)
+.env
+.env.*
+!.env.example
+
+# OpenSpec (documentos internos de planejamento)
+openspec/
+.agent/
